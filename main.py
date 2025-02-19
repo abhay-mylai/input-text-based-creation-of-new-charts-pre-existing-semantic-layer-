@@ -21,10 +21,18 @@ def main():
 
         print(f"🗃 Matching Dataset: {dataset_name}")
 
-        # Step 3: Generate chart configuration
-        chart_config = generate_chart_config(dataset_name, chart_type)
+        # Step 3: Ask user for chart name
+        chart_name = input("Enter a name for your chart: ").strip()
+        if not chart_name:
+            chart_name = f"{dataset_name} {chart_type} Chart"
 
-        # Step 4: Create chart
+       
+
+        # Step 5: Generate chart configuration
+        chart_config = generate_chart_config(dataset_name, chart_type)
+        chart_config["slice_name"] = chart_name  # Set chart name
+
+        # Step 6: Create chart and add to dashboard
         chart_url = create_chart(chart_config)
 
         if chart_url:

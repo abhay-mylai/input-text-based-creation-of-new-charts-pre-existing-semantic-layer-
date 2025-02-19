@@ -1,11 +1,10 @@
 import requests
 from config import SUPERSET_URL
 from superset_client import get_superset_token, get_csrf_token
-import re
 import json
 
-def create_chart(chart_config):
-    """Creates a chart in Superset using the provided configuration."""
+def create_chart(chart_config, dashboard_name=None):
+    """Creates a chart in Superset and adds it to an existing dashboard if specified."""
     token = get_superset_token()
     csrf_token, cookies = get_csrf_token()
 
@@ -24,19 +23,43 @@ def create_chart(chart_config):
     session = requests.Session()
     session.cookies.update(cookies)
 
+    # ✅ Step 1: Create the chart
     response = session.post(f"{SUPERSET_URL}/api/v1/chart", json=chart_config, headers=headers)
 
     if response.status_code == 201:
         chart_id = response.json()["id"]
         chart_url = f"{SUPERSET_URL}/superset/explore/?slice_id={chart_id}"
-        print(f"✅ Chart created successfully! View it here: {chart_url}")
+        print(f"✅ Chart created successfully with ID: {chart_id}")
 
-        # ✅ Attach query context to avoid empty query issue
-        # attach_query_context(chart_id)
 
         return chart_url
     else:
         print(f"❌ Chart creation failed: {response.status_code}, Response: {response.text}")
         return None
+
+
+def get_dashboard_id(dashboard_name):
+    """Fetches the dashboard ID by name."""
+    token = get_superset_token()
+    csrf_token, cookies = get_csrf_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "X-CSRFToken": csrf_token,
+        "Referer": SUPERSET_URL
+    }
+
+    session = requests.Session()
+    session.cookies.update(cookies)
+
+    response = session.get(f"{SUPERSET_URL}/api/v1/dashboard/", headers=headers)
     
+    if response.status_code == 200:
+        dashboards = response.json()["result"]
+        for dashboard in dashboards:
+            if dashboard["dashboard_title"].lower() == dashboard_name.lower():
+                return dashboard["id"]
+    print(f"❌ Dashboard '{dashboard_name}' not found.")
+    return None
+
 

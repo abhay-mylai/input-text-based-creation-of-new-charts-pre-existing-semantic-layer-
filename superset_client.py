@@ -48,7 +48,7 @@ def get_csrf_token():
             print("❌ CSRF token retrieval failed. No token received.")
             return None, None
 
-        print(f"✅ CSRF Token retrieved successfully: {csrf_token}")
+        # print(f"✅ CSRF Token retrieved successfully: {csrf_token}")
         return csrf_token, session.cookies  # ✅ Return CSRF token & cookies
 
     except requests.exceptions.RequestException as e:
